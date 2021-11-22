@@ -1,10 +1,14 @@
 import pygame
-import math
 from queue import PriorityQueue
 
+ROWS = 80
 WIDTH = 800
+
+dt = WIDTH % ROWS
+WIDTH = WIDTH - dt
+
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
-pygame.display.set_caption("A* Path Finding Algorithm")
+pygame.display.set_caption("A* Path Finding")
 
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -13,9 +17,8 @@ YELLOW = (255, 255, 0)
 WHITE = (100, 100, 100)
 BLACK = (0, 0, 0)
 PURPLE = (128, 0, 128)
-ORANGE = (255, 165, 0)
-GREY = (128, 128, 128)
-TURQUOISE = (64, 224, 208)
+DARK_GREEN = (0, 150, 0)
+DARK_RED = (150, 0, 0)
 
 
 class Spot:
@@ -42,16 +45,16 @@ class Spot:
         return self.color == BLACK
 
     def is_start(self):
-        return self.color == ORANGE
+        return self.color == DARK_GREEN
 
     def is_end(self):
-        return self.color == TURQUOISE
+        return self.color == DARK_RED
 
     def reset(self):
         self.color = WHITE
 
     def make_start(self):
-        self.color = ORANGE
+        self.color = DARK_GREEN
 
     def make_closed(self):
         self.color = RED
@@ -63,7 +66,7 @@ class Spot:
         self.color = BLACK
 
     def make_end(self):
-        self.color = TURQUOISE
+        self.color = DARK_RED
 
     def make_path(self):
         self.color = PURPLE
@@ -88,6 +91,7 @@ class Spot:
     def __lt__(self, other):
         return False
 
+
 def make_grid(rows, width):
     grid = []
     gap = width // rows
@@ -103,9 +107,9 @@ def make_grid(rows, width):
 def draw_grid(win, rows, width):
     gap = width // rows
     for i in range(rows):
-        pygame.draw.line(win, GREY, (0, i * gap), (width, i * gap))
-        for j in range(rows):
-            pygame.draw.line(win, GREY, (j * gap, 0), (j * gap, width))
+        pygame.draw.line(win, BLACK, (0, i * gap), (width, i * gap))
+    for j in range(rows):
+        pygame.draw.line(win, BLACK, (j * gap, 0), (j * gap, width))
 
 
 def draw(win, grid, rows, width):
@@ -118,10 +122,11 @@ def draw(win, grid, rows, width):
     draw_grid(win, rows, width)
     pygame.display.update()
 
+
 def h(p1, p2):
     x1, y1 = p1
     x2, y2 = p2
-    return abs(x1 - x2) + abs(y1 - y2)
+    return abs(x1 - x2) + abs(y1 - y2) * 1.000000001
 
 
 def reconstruct_path(came_from, current, draw):
@@ -158,7 +163,7 @@ def algorithm(draw, grid, start, end):
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
-
+            current.neighbors.sort()
             if temp_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
                 g_score[neighbor] = temp_g_score
@@ -177,9 +182,6 @@ def algorithm(draw, grid, start, end):
     return False
 
 
-
-
-
 def get_clicked_pos(pos, rows, width):
     gap = width // rows
     y, x = pos
@@ -191,7 +193,6 @@ def get_clicked_pos(pos, rows, width):
 
 
 def main(win, width):
-    ROWS = 40
     grid = make_grid(ROWS, width)
 
     start = None
